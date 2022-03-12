@@ -9,7 +9,7 @@ import {
 
 let data = [];
 let quadtree;
-var expr_max;
+var expr_max = 10;
 var gene = "ZFP36L1";
 
 const createAnnotationData = datapoint => ({
@@ -41,18 +41,21 @@ streamingLoaderWorker.onmessage = ({
       
   if (finished) {
     const meta = data
-    console.log(meta);
+    //console.log(meta);
     
       iterateElements(".controls a", el => {
           el.addEventListener("click", () => {
             iterateElements(".controls a", el2 => el2.classList.remove("active"));
             el.classList.add("active");
-          gene = el.id;
-          console.log(gene);
-          redraw();
+            if (el.id != "cluster") {
+              gene = el.id;
+          //console.log(gene);
+              //redraw();
+            }
+          
           data = [];
       
-    const streamingLoaderWorker2 = new Worker("streaming-tsv-parser.js");
+    const streamingLoaderWorker2 = new Worker("streaming-tsv-parser2.js");
     streamingLoaderWorker2.onmessage = ({
       data: { items, totalBytes, finished }
     }) => {
@@ -63,13 +66,14 @@ streamingLoaderWorker.onmessage = ({
         }))
         .filter(d => d.expr);
       data = data.concat(rows);
+      //console.log(rows);
       
       if (finished) {
         document.getElementById("loading").style.display = "none";
-        console.log(data);
-        console.log(meta);
+        //console.log(data);
+        //console.log(meta);
         data = _.merge(data, meta);
-        console.log(data);
+        //console.log(data);
 
         // compute the fill color for each datapoint
         const exprColorScale = d3
@@ -87,7 +91,7 @@ streamingLoaderWorker.onmessage = ({
         // wire up the fill color selector
             //fillColor.value(el.id === "cluster" ? clusterFill : clusterFill);
             fillColor.value(el.id === "cluster" ? clusterFill : exprFill);
-            redraw();
+            //redraw();
 
         // create a spatial index for rapidly finding the closest datapoint
         quadtree = d3
@@ -97,8 +101,8 @@ streamingLoaderWorker.onmessage = ({
           .addAll(data);
       }
       redraw();
-      expr_max = Math.max(...data.map(x => x.expr));
-      console.log(expr_max)
+      //expr_max = Math.max(...data.map(x => x.expr));
+      //console.log(expr_max)
     };
     console.log(gene);
     streamingLoaderWorker2.postMessage(gene + ".tsv");
@@ -109,8 +113,8 @@ streamingLoaderWorker.onmessage = ({
 streamingLoaderWorker.postMessage("metadata.tsv");
 
 const clusterColorScale = d3.scaleOrdinal(d3.schemeCategory10);
-const xScale = d3.scaleLinear().domain([-15, 15]);
-const yScale = d3.scaleLinear().domain([-15, 15]);
+const xScale = d3.scaleLinear().domain([-45, 45]);
+const yScale = d3.scaleLinear().domain([-45, 45]);
 const xScaleOriginal = xScale.copy();
 const yScaleOriginal = yScale.copy();
 
