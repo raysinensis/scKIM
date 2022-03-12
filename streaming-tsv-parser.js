@@ -1,5 +1,3 @@
-
-
 // a TSV parser that parses the data incrementally in chunks
 const tsvChunkedParser = () => {
   const textDecoder = new TextDecoder("utf-8");
@@ -9,7 +7,7 @@ const tsvChunkedParser = () => {
   return {
     parseChunk(chunk) {
       // decode and split into lines
-      const textData = textDecoder.decode(chunk) + previousChunk;
+      const textData = previousChunk + textDecoder.decode(chunk);
       const lines = textData.split("\n");
 
       // the first line is our column headings

@@ -9,10 +9,12 @@ import {
 
 let data = [];
 let quadtree;
+var expr_max;
+var gene = "ZFP36L1";
 
 const createAnnotationData = datapoint => ({
   note: {
-    label: datapoint.id + " ",// + datapoint.expr,
+    label: datapoint.id + " " + datapoint.expr,
     bgPadding: 5,
     title: trunc(datapoint.cluster, 100)
   },
@@ -22,6 +24,7 @@ const createAnnotationData = datapoint => ({
   dy: 20
 });
 
+let meta;
 // create a web worker that streams the chart data
 const streamingLoaderWorker = new Worker("streaming-tsv-parser.js");
 streamingLoaderWorker.onmessage = ({
@@ -31,51 +34,81 @@ streamingLoaderWorker.onmessage = ({
     .map(d => ({
       ...d,
       x: Number(d.x),
-      y: Number(d.y),
-     // expr: Number(d.expr)
-    }))
-    //.filter(d => d.expr);
+      y: Number(d.y)
+      }))
+    .filter(d => d.x);
   data = data.concat(rows);
-
+      
   if (finished) {
-    document.getElementById("loading").style.display = "none";
+    const meta = data
+    console.log(meta);
+    
+      iterateElements(".controls a", el => {
+          el.addEventListener("click", () => {
+            iterateElements(".controls a", el2 => el2.classList.remove("active"));
+            el.classList.add("active");
+          gene = el.id;
+          console.log(gene);
+          redraw();
+          data = [];
+      
+    const streamingLoaderWorker2 = new Worker("streaming-tsv-parser.js");
+    streamingLoaderWorker2.onmessage = ({
+      data: { items, totalBytes, finished }
+    }) => {
+      const rows = items
+        .map(d => ({
+          ...d,
+          expr: d.expr
+        }))
+        .filter(d => d.expr);
+      data = data.concat(rows);
+      
+      if (finished) {
+        document.getElementById("loading").style.display = "none";
+        console.log(data);
+        console.log(meta);
+        data = _.merge(data, meta);
+        console.log(data);
 
-    // compute the fill color for each datapoint
-    const clusterFill = d =>
-      webglColor(clusterColorScale(hashCode(d.cluster) % 10));
-    //const exprFill = d => webglColor(exprColorScale(d.expr));
+        // compute the fill color for each datapoint
+        const exprColorScale = d3
+          .scaleSequential()
+          .domain([0, expr_max])
+          .interpolator(d3.interpolateReds);
+  
+        const clusterFill = d =>
+          webglColor(clusterColorScale(hashCode(d.cluster) % 10));
+        const exprFill = d => webglColor(exprColorScale(d.expr));
+    
+        const fillColor = fc.webglFillColor().value(clusterFill).data(data);
+        pointSeries.decorate(program => fillColor(program));
+    
+        // wire up the fill color selector
+            //fillColor.value(el.id === "cluster" ? clusterFill : clusterFill);
+            fillColor.value(el.id === "cluster" ? clusterFill : exprFill);
+            redraw();
 
-    const fillColor = fc.webglFillColor().value(clusterFill).data(data);
-    pointSeries.decorate(program => fillColor(program));
-
-    // wire up the fill color selector
-    iterateElements(".controls a", el => {
-      el.addEventListener("click", () => {
-        iterateElements(".controls a", el2 => el2.classList.remove("active"));
-        el.classList.add("active");
-        fillColor.value(el.id === "cluster" ? clusterFill : clusterFill);
-        //fillColor.value(el.id === "cluster" ? clusterFill : exprFill);
-        redraw();
+        // create a spatial index for rapidly finding the closest datapoint
+        quadtree = d3
+          .quadtree()
+          .x(d => d.x)
+          .y(d => d.y)
+          .addAll(data);
+      }
+      redraw();
+      expr_max = Math.max(...data.map(x => x.expr));
+      console.log(expr_max)
+    };
+    console.log(gene);
+    streamingLoaderWorker2.postMessage(gene + ".tsv");
+        });
       });
-    });
-
-    // create a spatial index for rapidly finding the closest datapoint
-    quadtree = d3
-      .quadtree()
-      .x(d => d.x)
-      .y(d => d.y)
-      .addAll(data);
-  }
-
-  redraw();
+  };
 };
 streamingLoaderWorker.postMessage("metadata.tsv");
 
 const clusterColorScale = d3.scaleOrdinal(d3.schemeCategory10);
-//const exprColorScale = d3
-//  .scaleSequential()
-//  .domain([0, 5])
-//  .interpolator(d3.interpolateReds);
 const xScale = d3.scaleLinear().domain([-15, 15]);
 const yScale = d3.scaleLinear().domain([-15, 15]);
 const xScaleOriginal = xScale.copy();
@@ -84,7 +117,7 @@ const yScaleOriginal = yScale.copy();
 const pointSeries = fc
   .seriesWebglPoint()
   .equals((a, b) => a === b)
-  .size(1)
+  .size(2)
   .crossValue(d => d.x)
   .mainValue(d => d.y);
 
