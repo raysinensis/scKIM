@@ -12,9 +12,9 @@ let quadtree;
 
 const createAnnotationData = datapoint => ({
   note: {
-    label: datapoint.id + " " + datapoint.year,
+    label: datapoint.id + " ",// + datapoint.expr,
     bgPadding: 5,
-    title: trunc(datapoint.language, 100)
+    title: trunc(datapoint.cluster, 100)
   },
   x: datapoint.x,
   y: datapoint.y,
@@ -32,20 +32,20 @@ streamingLoaderWorker.onmessage = ({
       ...d,
       x: Number(d.x),
       y: Number(d.y),
-      year: Number(d.ZFP36)
+     // expr: Number(d.expr)
     }))
-    .filter(d => d.year);
+    //.filter(d => d.expr);
   data = data.concat(rows);
 
   if (finished) {
     document.getElementById("loading").style.display = "none";
 
     // compute the fill color for each datapoint
-    const languageFill = d =>
-      webglColor(languageColorScale(hashCode(d.language) % 10));
-    const yearFill = d => webglColor(yearColorScale(d.year));
+    const clusterFill = d =>
+      webglColor(clusterColorScale(hashCode(d.cluster) % 10));
+    //const exprFill = d => webglColor(exprColorScale(d.expr));
 
-    const fillColor = fc.webglFillColor().value(languageFill).data(data);
+    const fillColor = fc.webglFillColor().value(clusterFill).data(data);
     pointSeries.decorate(program => fillColor(program));
 
     // wire up the fill color selector
@@ -53,7 +53,8 @@ streamingLoaderWorker.onmessage = ({
       el.addEventListener("click", () => {
         iterateElements(".controls a", el2 => el2.classList.remove("active"));
         el.classList.add("active");
-        fillColor.value(el.id === "language" ? languageFill : yearFill);
+        fillColor.value(el.id === "cluster" ? clusterFill : clusterFill);
+        //fillColor.value(el.id === "cluster" ? clusterFill : exprFill);
         redraw();
       });
     });
@@ -68,13 +69,13 @@ streamingLoaderWorker.onmessage = ({
 
   redraw();
 };
-streamingLoaderWorker.postMessage("data.tsv");
+streamingLoaderWorker.postMessage("metadata.tsv");
 
-const languageColorScale = d3.scaleOrdinal(d3.schemeCategory10);
-const yearColorScale = d3
-  .scaleSequential()
-  .domain([0, 5])
-  .interpolator(d3.interpolateReds);
+const clusterColorScale = d3.scaleOrdinal(d3.schemeCategory10);
+//const exprColorScale = d3
+//  .scaleSequential()
+//  .domain([0, 5])
+//  .interpolator(d3.interpolateReds);
 const xScale = d3.scaleLinear().domain([-15, 15]);
 const yScale = d3.scaleLinear().domain([-15, 15]);
 const xScaleOriginal = xScale.copy();
