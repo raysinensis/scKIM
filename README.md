@@ -2,7 +2,7 @@
 
 AWS-hostable browser solution for scRNA-seq and spatial transcriptomics.
 
-The goal is to use [D3FC](https://github.com/d3fc/d3fc) and stream loading code from [Apache Arrow](https://github.com/ColinEberhardt/d3fc-webgl-hathi-explorer) to speed up presentation of 1M+ cells/spatial spots, and still achieving lowest entry and sharing threshold possible - a link in the browser without any additional software installations or dataset downloads.
+The goal is to use [D3FC](https://github.com/d3fc/d3fc) GPU-accelerated drawing and data stream with [Apache Arrow](https://arrow.apache.org/), drawing from data science visualization examples [here](https://github.com/ColinEberhardt/d3fc-webgl-hathi-explorer) and [here](https://github.com/chrisprice/d3fc-webgl-hathi-explorer) to speed up presentation of 1M+ cells/spatial spots, and still achieving lowest entry and sharing threshold possible - a link in the browser without any additional software installations or dataset downloads.
 
 # Current working examples
 
@@ -12,9 +12,11 @@ The goal is to use [D3FC](https://github.com/d3fc/d3fc) and stream loading code 
 
 # Comparison to other browser solutions
 
-| Consideration | ScKIM_D3 | cellBrowser | cellXgene | loupe | R shiny solutions |
+| Consideration | ScKIM_D3 | cellBrowser | cellXgene | 10x Loupe | R shiny solutions |
 |:--------|:--------|:--------|:--------|:--------|:--------|
 | Web access | ✓ | ✓ | ✓ | x | ✓ |
 | Amazon Cloud deployment | ✓ | ✓ | x | x | x |
 | Spatial data support | ✓ | x | ✓ | ✓ | ✓ |
+| Giant datasets | ✓ | ✓ | ✓ | ✓ | x |
 | Differential expression analysis | x | x | ✓ | ✓ | ✓ |
+
