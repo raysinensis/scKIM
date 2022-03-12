@@ -10,7 +10,7 @@ import {
 let data = [];
 let quadtree;
 var expr_max = 10;
-var gene = "ZFP36L1";
+var gene = "";
 
 const createAnnotationData = datapoint => ({
   note: {
@@ -38,6 +38,20 @@ streamingLoaderWorker.onmessage = ({
       }))
     .filter(d => d.x);
   data = data.concat(rows);
+  
+    document.getElementById("loading").style.display = "none";
+    const clusterFill = d =>
+        webglColor(clusterColorScale(hashCode(d.cluster) % 10));
+    var fillColor = fc.webglFillColor().value(clusterFill).data(data);
+        pointSeries.decorate(program => fillColor(program));
+    fillColor.value(clusterFill);
+    console.log(fillColor);
+    quadtree = d3
+          .quadtree()
+          .x(d => d.x)
+          .y(d => d.y)
+          .addAll(data);
+    redraw();
       
   if (finished) {
     const meta = data
@@ -48,13 +62,13 @@ streamingLoaderWorker.onmessage = ({
             iterateElements(".controls a", el2 => el2.classList.remove("active"));
             el.classList.add("active");
             if (el.id != "cluster") {
-              gene = el.id;
+              gene = el.id + ".tsv";
           //console.log(gene);
               //redraw();
             }
           
           data = [];
-      
+    
     const streamingLoaderWorker2 = new Worker("streaming-tsv-parser2.js");
     streamingLoaderWorker2.onmessage = ({
       data: { items, totalBytes, finished }
@@ -69,7 +83,6 @@ streamingLoaderWorker.onmessage = ({
       //console.log(rows);
       
       if (finished) {
-        document.getElementById("loading").style.display = "none";
         //console.log(data);
         //console.log(meta);
         data = _.merge(data, meta);
@@ -81,17 +94,12 @@ streamingLoaderWorker.onmessage = ({
           .domain([0, expr_max])
           .interpolator(d3.interpolateReds);
   
-        const clusterFill = d =>
-          webglColor(clusterColorScale(hashCode(d.cluster) % 10));
         const exprFill = d => webglColor(exprColorScale(d.expr));
-    
-        const fillColor = fc.webglFillColor().value(clusterFill).data(data);
+        fillColor = fc.webglFillColor().value(clusterFill).data(data);
         pointSeries.decorate(program => fillColor(program));
-    
         // wire up the fill color selector
-            //fillColor.value(el.id === "cluster" ? clusterFill : clusterFill);
-            fillColor.value(el.id === "cluster" ? clusterFill : exprFill);
-            //redraw();
+        //fillColor.value(el.id === "cluster" ? clusterFill : clusterFill);
+        fillColor.value(el.id === "cluster" ? clusterFill : exprFill);
 
         // create a spatial index for rapidly finding the closest datapoint
         quadtree = d3
@@ -99,13 +107,16 @@ streamingLoaderWorker.onmessage = ({
           .x(d => d.x)
           .y(d => d.y)
           .addAll(data);
+        redraw();
+        //console.log(clusterFill);
+        //console.log(exprFill);
+
       }
-      redraw();
       //expr_max = Math.max(...data.map(x => x.expr));
       //console.log(expr_max)
     };
     console.log(gene);
-    streamingLoaderWorker2.postMessage(gene + ".tsv");
+    streamingLoaderWorker2.postMessage(gene);
         });
       });
   };
