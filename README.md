@@ -30,7 +30,8 @@ add --allow-file-access-from-files to properties
 |:--------|:--------|:--------|:--------|:--------|:--------|
 | Web access | ✓ | ✓ | ✓ | x | ✓ |
 | Amazon Cloud deployment | ✓ | ✓ | x | x | x |
-| Spatial data support | ✓ | x | ✓ | ✓ | ✓ |
+| Spatial information | ✓ | x | ✓ | ✓ | ✓ |
+| Custom data | ✓ | x | ✓ | ✓ | ✓ |
 | Giant datasets | ✓ | ✓ | ✓ | ✓ | x |
 | Differential expression analysis | x | x | ✓ | ✓ | ✓ |
 
