@@ -10,6 +10,8 @@ The goal is to use [D3FC](https://github.com/d3fc/d3fc) GPU-accelerated drawing 
 
 [1.3m cells](https://rfd3test.s3.us-west-2.amazonaws.com/v3/index.html)
 
+[10x Spatial Transcriptomics](https://rfd3test.s3.us-west-2.amazonaws.com/st_1/index.html)(image not yet aligned)
+
 # Current working examples (local)
 
 Git clone the repo and open `index.html`. May need additional settings:

@@ -45,7 +45,7 @@ streamingLoaderWorker.onmessage = ({
     var fillColor = fc.webglFillColor().value(clusterFill).data(data);
         pointSeries.decorate(program => fillColor(program));
     fillColor.value(clusterFill);
-    console.log(fillColor);
+    //console.log(fillColor);
     quadtree = d3
           .quadtree()
           .x(d => d.x)
@@ -69,7 +69,7 @@ streamingLoaderWorker.onmessage = ({
           
           data = [];
     
-    const streamingLoaderWorker2 = new Worker("streaming-tsv-parser2.js");
+    const streamingLoaderWorker2 = new Worker("streaming-tsv-parser.js");
     streamingLoaderWorker2.onmessage = ({
       data: { items, totalBytes, finished }
     }) => {
@@ -124,8 +124,8 @@ streamingLoaderWorker.onmessage = ({
 streamingLoaderWorker.postMessage("metadata.tsv");
 
 const clusterColorScale = d3.scaleOrdinal(d3.schemeCategory10);
-const xScale = d3.scaleLinear().domain([-45, 45]);
-const yScale = d3.scaleLinear().domain([-45, 45]);
+const xScale = d3.scaleLinear().domain([-450, 450]);
+const yScale = d3.scaleLinear().domain([-450, 450]);
 const xScaleOriginal = xScale.copy();
 const yScaleOriginal = yScale.copy();
 
@@ -143,6 +143,9 @@ const zoom = d3
     // update the scales based on current zoom
     xScale.domain(d3.event.transform.rescaleX(xScaleOriginal).domain());
     yScale.domain(d3.event.transform.rescaleY(yScaleOriginal).domain());
+    //svg_canvas.setAttribute("transform", d3.event.transform);
+    t_factor = d3.event.transform;
+    console.log(d3.event.transform)
     redraw();
   });
 
@@ -201,8 +204,32 @@ const chart = fc
       .call(pointer)
   );
 
+const  translate0 = [0, 0], scale0 = 1;
+var t_factor = 1;
+function zoom2() {
+  svg_canvas.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+  console.log("translate: " + d3.event.translate + ", scale: " + d3.event.scale);
+}
+    
 // render the chart with the required data
 // Enqueues a redraw to occur on the next animation frame
 const redraw = () => {
-  d3.select("#chart").datum({ annotations, data }).call(chart);
+  var final = d3.select("#chart")
+    .datum({ annotations, data })
+  d3.select('.svg-plot-area').selectAll('#svg_canvas').remove()
+  var svg2 = d3.select('.svg-plot-area')
+  .append("svg")
+  .attr("transform", t_factor)
+  .attr("id", "svg_canvas")
+  //.attr("class", "svg-plot-area plot-area")
+  //.attr("viewBox", "0 0 766 663")
+    .append('image')
+    .attr('xlink:href','st/image.png').style("opacity", 0.6)
+    //.style("width", 663)
+    //.style("height", 766) 
+  final.call(chart);
+
+  //d3.select("#svg2").call(svg2);      
 };
+   
+ 

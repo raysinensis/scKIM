@@ -1,0 +1,9 @@
+coefficient <- s@images$`723`@scale.factors$lowres
+s@images$`723`@coordinates %>% rownames_to_column("id") %>% mutate(imagerow = imagerow * coefficient, imagecol = imagecol * coefficient) %>% select(id, tissue, x = imagerow, y = imagecol) %>% left_join(s@meta.data %>% rownames_to_column("id") %>% select(id, cluster = name)) %>% write_tsv("st_metadata.tsv")
+
+GetImage(s, mode = "raster", image = "723") -> a
+png('image.png', height=nrow(a), width=ncol(a)) 
+plot(a, maxpixels=raster::ncell(a))
+dev.off()
+
+FetchData(s, c("ZFP36L1")) %>% select(expr = ZFP36L1) %>% write_tsv("ZFP36.tsv")
