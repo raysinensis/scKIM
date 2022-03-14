@@ -8846,7 +8846,7 @@ void main() {
         } = this;
 
         if (other.length > 0) {
-          throw new Error('A d3fc-svg/canvas element must only contain a single svg/canvas element.');
+          //throw new Error('A d3fc-svg/canvas element must only contain a single svg/canvas element.');
         }
 
         applyMeasurements(this, node, {

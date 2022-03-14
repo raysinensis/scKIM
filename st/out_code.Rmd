@@ -7,3 +7,14 @@ plot(a, maxpixels=raster::ncell(a))
 dev.off()
 
 FetchData(s, c("ZFP36L1")) %>% select(expr = ZFP36L1) %>% write_tsv("ZFP36.tsv")
+
+
+coord <- sapply(s@images %>% names, function(x) {
+  coefficient <- s@images[[x]]@scale.factors$lowres
+  GetTissueCoordinates(s, image = x) %>% mutate(y = 1 - imagerow, x = imagecol)
+  }, simplify = F) %>% do.call(rbind, .) %>% rownames_to_column("name") %>% separate(name, sep = "\\.", into = c("sample", "id"))
+  
+  
+left_join(s@meta.data %>% rownames_to_column("id"), coord) %>% select(id, cluster = name, sample, x, y) %>% write_tsv("metadata.tsv")
+  
+  

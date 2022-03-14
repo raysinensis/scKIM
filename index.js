@@ -8,9 +8,12 @@ import {
 } from "./util.js";
 
 let data = [];
+let data2 = [];
 let quadtree;
 var expr_max = 10;
 var gene = "";
+var set_height = 600;
+var set_width = 586;
 
 const createAnnotationData = datapoint => ({
   note: {
@@ -40,12 +43,13 @@ streamingLoaderWorker.onmessage = ({
   data = data.concat(rows);
   
     document.getElementById("loading").style.display = "none";
-    const clusterFill = d =>
+    var clusterFill = d =>
         webglColor(clusterColorScale(hashCode(d.cluster) % 10));
+   
     var fillColor = fc.webglFillColor().value(clusterFill).data(data);
         pointSeries.decorate(program => fillColor(program));
     fillColor.value(clusterFill);
-    //console.log(fillColor);
+    
     quadtree = d3
           .quadtree()
           .x(d => d.x)
@@ -55,6 +59,7 @@ streamingLoaderWorker.onmessage = ({
       
   if (finished) {
     const meta = data
+    data = _.filter(data, { 'sample': "723"})
     //console.log(meta);
     
       iterateElements(".controls a", el => {
@@ -62,7 +67,7 @@ streamingLoaderWorker.onmessage = ({
             iterateElements(".controls a", el2 => el2.classList.remove("active"));
             el.classList.add("active");
             if (el.id != "cluster") {
-              gene = el.id + ".tsv";
+              gene = "st/" + el.id + ".tsv";
           //console.log(gene);
               //redraw();
             }
@@ -86,9 +91,11 @@ streamingLoaderWorker.onmessage = ({
         //console.log(data);
         //console.log(meta);
         data = _.merge(data, meta);
-        //console.log(data);
+        data = _.filter(data, { 'sample': "723"})
+        console.log(data);
 
         // compute the fill color for each datapoint
+
         const exprColorScale = d3
           .scaleSequential()
           .domain([0, expr_max])
@@ -121,31 +128,31 @@ streamingLoaderWorker.onmessage = ({
       });
   };
 };
-streamingLoaderWorker.postMessage("metadata.tsv");
+streamingLoaderWorker.postMessage("st/metadata.tsv");
 
 const clusterColorScale = d3.scaleOrdinal(d3.schemeCategory10);
-const xScale = d3.scaleLinear().domain([-450, 450]);
-const yScale = d3.scaleLinear().domain([-450, 450]);
+const xScale = d3.scaleLinear().domain([0 - 554/10, 554 + 554/10]);
+const yScale = d3.scaleLinear().domain([-584 - 584/10, 0 + 584/10]);
 const xScaleOriginal = xScale.copy();
 const yScaleOriginal = yScale.copy();
 
 const pointSeries = fc
   .seriesWebglPoint()
   .equals((a, b) => a === b)
-  .size(2)
+  .size(5)
   .crossValue(d => d.x)
   .mainValue(d => d.y);
 
 const zoom = d3
   .zoom()
-  .scaleExtent([0.8, 10])
+  .scaleExtent([0.5, 10])
   .on("zoom", () => {
     // update the scales based on current zoom
     xScale.domain(d3.event.transform.rescaleX(xScaleOriginal).domain());
     yScale.domain(d3.event.transform.rescaleY(yScaleOriginal).domain());
     //svg_canvas.setAttribute("transform", d3.event.transform);
     t_factor = d3.event.transform;
-    console.log(d3.event.transform)
+    //console.log(d3.event.transform)
     redraw();
   });
 
@@ -203,33 +210,46 @@ const chart = fc
       .call(zoom)
       .call(pointer)
   );
+chart // ~~ it errors on this line ~~
+  .yOrient('left')
+  .xOrient('top')
 
-const  translate0 = [0, 0], scale0 = 1;
-var t_factor = 1;
-function zoom2() {
-  svg_canvas.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-  console.log("translate: " + d3.event.translate + ", scale: " + d3.event.scale);
-}
+var t_factor = "translate(0,0) scale(1,1)";
     
 // render the chart with the required data
 // Enqueues a redraw to occur on the next animation frame
 const redraw = () => {
-  var final = d3.select("#chart")
-    .datum({ annotations, data })
-  d3.select('.svg-plot-area').selectAll('#svg_canvas').remove()
-  var svg2 = d3.select('.svg-plot-area')
-  .append("svg")
-  .attr("transform", t_factor)
-  .attr("id", "svg_canvas")
+  //data2 = _.filter(data, { 'sample': "723"})
+  //console.log(data2);
+  var final = d3.select("#chart").datum({ annotations, data })
+  d3.select("#chart").select("d3fc-group").attr("auto-resize", "false").style("width", 586)
+    .style("height", 600) 
+  d3.select('.svg-plot-area').select("svg")
+    .attr("viewBox", "0 0 " + 586 + " " + 600)
+  d3.selectAll('#svg_canvas').remove()
+  //d3.select(".cartesian-chart")
+    //.append(d3.select('.svg-plot-area')
+    //  .clone(true).attr("class", "clone").node())
+  try {
+    set_width = (d3.select('.webgl-plot-area').select("canvas").attr("width"));
+    set_height = (d3.select('.webgl-plot-area').select("canvas").attr("height"));
+  } catch {}
+  
+  var svg2 = d3.select('.svg-plot-area').select("svg")
+  svg2.append("g")
+    .attr("transform", t_factor)
+    .attr("id", "svg_canvas")
+    .style("width", 554)
+    .style("height", 584) 
+    //.attr("viewBox", "0 0 " + set_width + " " + set_height)
   //.attr("class", "svg-plot-area plot-area")
   //.attr("viewBox", "0 0 766 663")
     .append('image')
-    .attr('xlink:href','st/image.png').style("opacity", 0.6)
-    //.style("width", 663)
-    //.style("height", 766) 
-  final.call(chart);
+    .attr('xlink:href','st/image.png').style("opacity", 0.4)
+    .style("width", 586)
+    .style("height", 600).attr("x", -40).attr("y", -10)
 
-  //d3.select("#svg2").call(svg2);      
+  final.call(chart);
 };
    
  
