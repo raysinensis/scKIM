@@ -26,12 +26,12 @@ add --allow-file-access-from-files to properties
 
 # Comparison to other browser solutions
 
-| Consideration | ScKIM_D3 | cellBrowser | cellXgene | 10x Loupe | R shiny solutions |
+| Consideration | ScKIM_D3 | cellBrowser | cellXgene | R shiny solutions | 10x Loupe |
 |:--------|:--------|:--------|:--------|:--------|:--------|
-| Web access | ✓ | ✓ | ✓ | x | ✓ |
+| Web access | ✓ | ✓ | ✓ | ✓ | x |
 | Amazon Cloud deployment | ✓ | ✓ | x | x | x |
 | Spatial information | ✓ | x | ✓ | ✓ | ✓ |
-| Custom data | ✓ | x | ✓ | ✓ | ✓ |
-| Giant datasets | ✓ | ✓ | ✓ | ✓ | x |
+| Custom data | ✓ | ✓ | ✓ | ✓ | x |
+| Giant datasets | ✓ | ✓ | ✓ | x | ✓ |
 | Differential expression analysis | x | x | ✓ | ✓ | ✓ |
 
