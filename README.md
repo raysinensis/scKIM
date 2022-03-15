@@ -1,4 +1,4 @@
-# ScKIM_D3
+# scKIM
 
 Static AWS-hostable browser solution for scRNA-seq and spatial transcriptomics.
 
